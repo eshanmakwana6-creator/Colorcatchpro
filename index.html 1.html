@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Catch Pro</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #020617;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+#menu, #gameOver {
+  position: absolute;
+  width: 100%;
+  top: 40%;
+}
+
+button {
+  padding: 14px 28px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  background: #22c55e;
+  color: black;
+  box-shadow: 0 0 20px #22c55e;
+}
+
+#gameArea {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  display: none;
+}
+
+#ball {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 0 25px cyan;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="catchSound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+<audio id="overSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+<div id="menu">
+  <h1>🎮 Color Catch Pro</h1>
+  <p>High Score: <span id="best">0</span></p>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="gameArea">
+  <h2 id="score">Score: 0</h2>
+  <div id="ball"></div>
+</div>
+
+<div id="gameOver" style="display:none;">
+  <h2>Game Over 😢</h2>
+  <p>Your Score: <span id="finalScore"></span></p>
+  <button onclick="location.reload()">Play Again</button>
+</div>
+
+<script>
+let score = 0;
+let speed = 1500;
+let running = false;
+let bestScore = localStorage.getItem("best") || 0;
+
+document.getElementById("best").innerText = bestScore;
+
+const ball = document.getElementById("ball");
+const catchSound = document.getElementById("catchSound");
+const overSound = document.getElementById("overSound");
+
+function randomPos() {
+  const x = Math.random() * (window.innerWidth - 60);
+  const y = Math.random() * (window.innerHeight - 120);
+  ball.style.left = x + "px";
+  ball.style.top = y + "px";
+  ball.style.background =
+    `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+}
+
+function moveBall() {
+  if (!running) return;
+  randomPos();
+  setTimeout(() => {
+    if (running) endGame();
+  }, speed);
+}
+
+ball.onclick = () => {
+  catchSound.play();
+  if (navigator.vibrate) navigator.vibrate(50);
+  score++;
+  document.getElementById("score").innerText = "Score: " + score;
+  speed = Math.max(400, speed - 80);
+  moveBall();
+};
+
+function startGame() {
+  running = true;
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("gameArea").style.display = "block";
+  moveBall();
+}
+
+function endGame() {
+  running = false;
+  overSound.play();
+  if (score > bestScore) {
+    bestScore = score;
+    localStorage.setItem("best", bestScore);
+  }
+  document.getElementById("finalScore").innerText = score;
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("gameOver").style.display = "block";
+}
+</script>
+
+</body>
+</html>
